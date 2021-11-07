@@ -1,27 +1,24 @@
-#[macro_use]
 extern crate include_dir;
+use std::path::PathBuf;
 
-use include_dir::Dir;
+use include_dir::{include_dir, Dir};
+
 static PROJECT_DIR: Dir = include_dir!("./priv");
 
 mod cli;
+mod document;
 
 fn main() {
     let text_file = PROJECT_DIR.get_file("foo.html").unwrap();
-
     println!("{}", text_file.contents_utf8().unwrap());
+
     println!("Hello, world!");
-    let args = cli::parse_opts();
-    println!("{:?}", args);
-    if (match args.op.as_str() {
-        "new" => cli::new(args.layout_root),
-        "gen" => Ok(()),
-        &_ => Ok(()),
-    })
-    .is_ok()
-    {
-        std::process::exit(0);
-    } else {
-        std::process::exit(1)
-    }
+    let path = PathBuf::from("foo.md");
+    let mut doc = document::new(&path);
+    println!("{:?}", doc);
+
+    document::render(&mut doc);
+    println!("{:?}", doc);
+
+    cli::dispatch()
 }
