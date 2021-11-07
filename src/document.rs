@@ -1,3 +1,4 @@
+use emojicons::EmojiFormatter;
 use pulldown_cmark::{html, Options, Parser};
 use std::fs;
 use std::path::Path;
@@ -19,13 +20,13 @@ pub fn new(path: &Path) -> Document {
 }
 
 pub fn render<'a>(document: &'a mut Document) -> &'a Document<'a> {
-    let markdown_input = &document.contents;
+    let markdown_input = format!("{}", EmojiFormatter(&document.contents));
 
     // Set up options and parser. Strikethroughs are not part of the CommonMark standard
     // and we therefore must enable it explicitly.
     let mut options = Options::empty();
     options.insert(Options::ENABLE_STRIKETHROUGH);
-    let parser = Parser::new_ext(markdown_input, options);
+    let parser = Parser::new_ext(&markdown_input, options);
 
     // Write to String buffer.
     let mut html_output: String = String::with_capacity(markdown_input.len() * 3 / 2);
