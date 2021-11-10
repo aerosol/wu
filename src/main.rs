@@ -17,7 +17,7 @@ fn main() {
     let mut doc = document::new(&path);
     println!("{:?}", doc);
 
-    document::render(&mut doc);
+    doc.render();
     println!("{:?}", doc);
 
     cli::dispatch()

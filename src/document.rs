@@ -10,6 +10,22 @@ pub struct Document<'a> {
     pub rendered: Option<String>,
 }
 
+impl<'a> Document<'a> {
+    pub fn render(&mut self) {
+        let markdown_input = format!("{}", EmojiFormatter(&self.contents));
+
+        let mut options = Options::empty();
+        options.insert(Options::ENABLE_STRIKETHROUGH);
+        let parser = Parser::new_ext(&markdown_input, options);
+
+        // Write to String buffer.
+        let mut html_output: String = String::with_capacity(markdown_input.len() * 3 / 2);
+        html::push_html(&mut html_output, parser);
+
+        self.rendered = Some(html_output);
+    }
+}
+
 pub fn new(path: &Path) -> Document {
     let contents = fs::read_to_string(path).expect("File not found");
     Document {
@@ -17,21 +33,4 @@ pub fn new(path: &Path) -> Document {
         contents,
         rendered: None,
     }
-}
-
-pub fn render<'a>(document: &'a mut Document) -> &'a Document<'a> {
-    let markdown_input = format!("{}", EmojiFormatter(&document.contents));
-
-    // Set up options and parser. Strikethroughs are not part of the CommonMark standard
-    // and we therefore must enable it explicitly.
-    let mut options = Options::empty();
-    options.insert(Options::ENABLE_STRIKETHROUGH);
-    let parser = Parser::new_ext(&markdown_input, options);
-
-    // Write to String buffer.
-    let mut html_output: String = String::with_capacity(markdown_input.len() * 3 / 2);
-    html::push_html(&mut html_output, parser);
-
-    document.rendered = Some(html_output);
-    document
 }
